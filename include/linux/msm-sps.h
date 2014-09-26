@@ -1419,6 +1419,16 @@ int sps_bam_process_irq(unsigned long dev);
 int sps_get_bam_addr(unsigned long dev, phys_addr_t *base,
 				u32 *size);
 
+/*
+ * sps_pipe_inject_zlt - inject a ZLT with EOT.
+ * @dev:	BAM device handle
+ * @pipe_index:	pipe index
+ *
+ * This function injects a ZLT with EOT for a pipe of a BAM.
+ *
+ * Return: 0 on success, negative value on error
+ */
+int sps_pipe_inject_zlt(unsigned long dev, u32 pipe_index);
 #else
 static inline int sps_register_bam_device(const struct sps_bam_props
 			*bam_props, unsigned long *dev_handle)
@@ -1614,6 +1624,10 @@ static inline int sps_get_bam_addr(unsigned long dev, phys_addr_t *base,
 	return -EPERM;
 }
 
+static inline int sps_pipe_inject_zlt(unsigned long dev, u32 pipe_index)
+{
+	return -EPERM;
+}
 #endif
 
 #endif /* _SPS_H_ */
