@@ -1300,7 +1300,7 @@ int sps_connect(struct sps_pipe *h, struct sps_connect *connect)
 	}
 
 	mutex_lock(&bam->lock);
-	SPS_DBG2(bam, "sps:sps_connect: bam %pa src 0x%lx dest 0x%lx mode %s",
+	SPS_DBG2("sps:sps_connect: bam %pa src 0x%lx dest 0x%lx mode %s",
 			BAM_ID(bam),
 			connect->source,
 			connect->destination,
