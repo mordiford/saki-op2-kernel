@@ -865,8 +865,7 @@ int sps_bam_pipe_connect(struct sps_pipe *bam_pipe,
 				iova = bam_pipe->connect.dest_iova;
 			else
 				iova = bam_pipe->connect.source_iova;
-			SPS_DBG2(dev,
-				"sps:BAM %pa pipe %d uses IOVA 0x%lx.\n",
+			SPS_DBG2("sps:BAM %pa pipe %d uses IOVA 0x%lx.\n",
 				 BAM_ID(dev), pipe_index, iova);
 			hw_params.peer_phys_addr = (u32)iova;
 		} else {
@@ -888,7 +887,7 @@ int sps_bam_pipe_connect(struct sps_pipe *bam_pipe,
 		if (dev->props.options & SPS_BAM_SMMU_EN) {
 			hw_params.data_base =
 				(phys_addr_t)bam_pipe->connect.data.iova;
-			SPS_DBG2(dev,
+			SPS_DBG2(
 				"sps:BAM %pa pipe %d uses IOVA 0x%lx for data FIFO.\n",
 				 BAM_ID(dev), pipe_index,
 				 bam_pipe->connect.data.iova);
@@ -941,7 +940,7 @@ int sps_bam_pipe_connect(struct sps_pipe *bam_pipe,
 		if (dev->props.options & SPS_BAM_SMMU_EN) {
 			hw_params.desc_base =
 				(phys_addr_t)bam_pipe->connect.desc.iova;
-			SPS_DBG2(dev,
+			SPS_DBG2(
 				"sps:BAM %pa pipe %d uses IOVA 0x%lx for desc FIFO.\n",
 				 BAM_ID(dev), pipe_index,
 				 bam_pipe->connect.desc.iova);
