@@ -372,9 +372,9 @@ static inline int is_fully_aligned(unsigned int va, phys_addr_t pa, size_t len,
 #endif
 
 static int __msm_iommu_pagetable_map_range(struct msm_iommu_pt *pt,
-		       unsigned long va, void *cookie,
+		       unsigned int va, void *cookie,
 		       struct msm_iommu_map_ops *ops,
-		       size_t len, int prot)
+		       unsigned int len, int prot)
 {
 	phys_addr_t pa;
 	unsigned int start_va = va;
@@ -599,8 +599,8 @@ void msm_iommu_pagetable_unmap_range(struct msm_iommu_pt *pt, unsigned long va,
 	}
 }
 
-int msm_iommu_pagetable_map_range(struct msm_iommu_pt *pt, unsigned long va,
-		struct scatterlist *sg, size_t len, int prot)
+int msm_iommu_pagetable_map_range(struct msm_iommu_pt *pt, unsigned int va,
+		struct scatterlist *sg, unsigned int len, int prot)
 {
 	return __msm_iommu_pagetable_map_range(pt, va, sg, &sg_ops, len, prot);
 }
@@ -620,15 +620,6 @@ int msm_iommu_pagetable_map(struct msm_iommu_pt *pt, unsigned long va,
 	ret = __msm_iommu_pagetable_map_range(pt, va, (void *)pa, &regular_ops,
 						len, prot);
 	return ret;
-}
-
-void msm_iommu_flush_pagetable(struct msm_iommu_pt *pt, unsigned long va,
-				size_t len)
-{
-	/* Consolidated flush of page tables has not been implemented for
-	 * v7S because this driver anyway takes care of combining flush
-	 * for last level PTEs
-	 */
 }
 
 phys_addr_t msm_iommu_iova_to_phys_soft(struct iommu_domain *domain,
