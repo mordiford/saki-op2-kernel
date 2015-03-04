@@ -1214,6 +1214,35 @@ static size_t msm_iommu_map_sg(struct iommu_domain *domain, unsigned long va,
 		return len;
 }
 
+#ifdef CONFIG_IOMMU_LPAE
+static phys_addr_t msm_iommu_get_phy_from_PAR(unsigned long va, u64 par)
+{
+	phys_addr_t phy;
+	/* Upper 28 bits from PAR, lower 12 from VA */
+	phy = (par & 0xFFFFFFF000ULL) | (va & 0x00000FFF);
+	return phy;
+}
+#else
+static phys_addr_t msm_iommu_get_phy_from_PAR(unsigned long va, u64 par)
+{
+	int ret, i;
+	struct scatterlist *tmp;
+	unsigned long len = 0;
+
+	/*
+	 * Longer term work: convert over to generic page table management
+	 * which means we can work on scattergather lists and the whole range
+	 */
+	for_each_sg(sg, tmp, nr_entries, i)
+		len += tmp->length;
+
+	ret = msm_iommu_map_range(domain, va, sg, len, prot);
+	if (ret)
+		return 0;
+	else
+		return len;
+}
+
 static phys_addr_t msm_iommu_iova_to_phys(struct iommu_domain *domain,
 					  phys_addr_t va)
 {
