@@ -527,7 +527,7 @@ static inline int is_fully_aligned(unsigned int va, phys_addr_t pa, size_t len,
 #endif
 
 s32 msm_iommu_pagetable_map_range(struct msm_iommu_pt *pt, unsigned long va,
-		       struct scatterlist *sg, size_t len, s32 prot)
+		       struct scatterlist *sg, u32 len, s32 prot)
 {
 	phys_addr_t pa;
 	u32 offset = 0;
