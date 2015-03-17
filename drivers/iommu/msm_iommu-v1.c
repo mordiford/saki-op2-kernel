@@ -378,7 +378,8 @@ static void __sync_tlb(struct msm_iommu_drvdata *iommu_drvdata, int ctx,
 		check_tlb_sync_state(iommu_drvdata, ctx, priv);
 }
 
-static int __flush_iotlb(struct iommu_domain *domain)
+#ifdef CONFIG_MSM_IOMMU_TLBINVAL_ON_MAP
+static int __flush_iotlb_va(struct iommu_domain *domain, unsigned int va)
 {
 	struct msm_iommu_priv *priv = domain->priv;
 	struct msm_iommu_drvdata *iommu_drvdata;
@@ -404,6 +405,7 @@ static int __flush_iotlb(struct iommu_domain *domain)
 fail:
 	return ret;
 }
+#endif
 
 static int __flush_iotlb_va(struct iommu_domain *domain, unsigned long va)
 {
@@ -1132,12 +1134,7 @@ static size_t msm_iommu_unmap(struct iommu_domain *domain, unsigned long va,
 	if (ret < 0)
 		goto fail;
 
-	msm_iommu_flush_pagetable(&priv->pt, va, len);
-	if (len <= SZ_4K)
-		ret = __flush_iotlb_va(domain, va);
-	else
-		ret = __flush_iotlb(domain);
-
+	ret = __flush_iotlb(domain);
 	msm_iommu_pagetable_free_tables(&priv->pt, va, len);
 fail:
 	mutex_unlock(&msm_iommu_lock);
