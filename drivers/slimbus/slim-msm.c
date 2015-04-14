@@ -499,18 +499,17 @@ u32 *msm_slim_manage_tx_msgq(struct msm_slim_ctrl *dev, bool getbuf,
 	int ret = 0;
 	int retries = 0;
 	u32 *retbuf = NULL;
-	unsigned long flags;
 
-	spin_lock_irqsave(&dev->tx_buf_lock, flags);
+	mutex_lock(&dev->tx_buf_lock);
 	if (!getbuf) {
 		msm_slim_tx_msg_return(dev, err);
-		spin_unlock_irqrestore(&dev->tx_buf_lock, flags);
+		mutex_unlock(&dev->tx_buf_lock);
 		return NULL;
 	}
 
 	retbuf = msm_slim_modify_tx_buf(dev, comp);
 	if (retbuf) {
-		spin_unlock_irqrestore(&dev->tx_buf_lock, flags);
+		mutex_unlock(&dev->tx_buf_lock);
 		return retbuf;
 	}
 
@@ -523,7 +522,7 @@ u32 *msm_slim_manage_tx_msgq(struct msm_slim_ctrl *dev, bool getbuf,
 			if (retries > 0)
 				SLIM_INFO(dev, "SLIM TX retrieved:%d retries",
 							retries);
-			spin_unlock_irqrestore(&dev->tx_buf_lock, flags);
+			mutex_unlock(&dev->tx_buf_lock);
 			return retbuf;
 		}
 
@@ -531,14 +530,14 @@ u32 *msm_slim_manage_tx_msgq(struct msm_slim_ctrl *dev, bool getbuf,
 		 * superframe size will vary based on clock gear
 		 * 1 superframe will consume at least 1 message
 		 * if HW is in good condition. With MX_RETRIES,
-		 * make sure we wait for ~2 superframes
+		 * make sure we wait for a [3, 10] superframes
 		 * before deciding HW couldn't process descriptors
 		 */
-		udelay(50);
+		usleep_range(100, 250);
 		retries++;
 	} while (ret && (retries < INIT_MX_RETRIES));
 
-	spin_unlock_irqrestore(&dev->tx_buf_lock, flags);
+	mutex_unlock(&dev->tx_buf_lock);
 	return NULL;
 }
 
@@ -585,9 +584,10 @@ msm_slim_rx_msgq_event(struct msm_slim_ctrl *dev, struct sps_event_notify *ev)
 static void
 msm_slim_handle_rx(struct msm_slim_ctrl *dev, struct sps_event_notify *ev)
 {
-	int ret = 0;
+	int ret = 0, index = 0;
 	u32 mc = 0;
 	u32 mt = 0;
+	u32 buffer[10];
 	u8 msg_len = 0;
 
 	if (ev->event_id != SPS_EVENT_EOT) {
@@ -595,34 +595,24 @@ msm_slim_handle_rx(struct msm_slim_ctrl *dev, struct sps_event_notify *ev)
 					__func__, ev->event_id);
 		return;
 	}
-
 	do {
-		ret = msm_slim_rx_msgq_get(dev, dev->current_rx_buf,
-					   dev->current_count);
-		if (ret == -ENODATA) {
-			return;
-		} else if (ret) {
+		ret = msm_slim_rx_msgq_get(dev, buffer, index);
+		if (ret) {
 			SLIM_ERR(dev, "rx_msgq_get() failed 0x%x\n",
 								ret);
 			return;
 		}
 
 		/* Traverse first byte of message for message length */
-		if (dev->current_count++ == 0) {
-			msg_len = *(dev->current_rx_buf) & 0x1F;
-			mt = (*(dev->current_rx_buf) >> 5) & 0x7;
-			mc = (*(dev->current_rx_buf) >> 8) & 0xff;
+		if (index++ == 0) {
+			msg_len = *buffer & 0x1F;
+			mt = (buffer[0] >> 5) & 0x7;
+			mc = (buffer[0] >> 8) & 0xff;
 			dev_dbg(dev->dev, "MC: %x, MT: %x\n", mc, mt);
 		}
-
 		msg_len = (msg_len < 4) ? 0 : (msg_len - 4);
-
-		if (!msg_len) {
-			dev->rx_slim(dev, (u8 *)dev->current_rx_buf);
-			dev->current_count = 0;
-		}
-
-	} while (1);
+	} while (msg_len);
+	dev->rx_slim(dev, (u8 *)buffer);
 }
 
 static void msm_slim_rx_msgq_cb(struct sps_event_notify *notify)
@@ -671,12 +661,8 @@ int msm_slim_rx_msgq_get(struct msm_slim_ctrl *dev, u32 *data, int offset)
 
 	pr_debug("iovec = (0x%x 0x%x 0x%x)\n",
 		iovec.addr, iovec.size, iovec.flags);
-
-	/* no more descriptors */
-	if (!ret && (iovec.addr == 0) && (iovec.size == 0)) {
-		ret = -ENODATA;
-		goto err_exit;
-	}
+	BUG_ON(iovec.addr < mem->phys_base);
+	BUG_ON(iovec.addr >= mem->phys_base + mem->size);
 
 	/* Calculate buffer index */
 	index = (iovec.addr - mem->phys_base) / 4;
@@ -698,7 +684,6 @@ int msm_slim_connect_endp(struct msm_slim_ctrl *dev,
 	struct sps_register_event sps_error_event; /* SPS_ERROR */
 	struct sps_register_event sps_descr_event; /* DESCR_DONE */
 	struct sps_connect *config = &endpoint->config;
-	unsigned long flags;
 
 	ret = sps_connect(endpoint->sps, config);
 	if (ret) {
@@ -752,12 +737,12 @@ int msm_slim_connect_endp(struct msm_slim_ctrl *dev,
 		}
 		dev->use_rx_msgqs = MSM_MSGQ_ENABLED;
 	} else {
-		spin_lock_irqsave(&dev->tx_buf_lock, flags);
+		mutex_lock(&dev->tx_buf_lock);
 		dev->tx_tail = 0;
 		dev->tx_head = 0;
 		for (i = 0; i < MSM_TX_BUFS; i++)
 			dev->wr_comp[i] = NULL;
-		spin_unlock_irqrestore(&dev->tx_buf_lock, flags);
+		mutex_unlock(&dev->tx_buf_lock);
 		dev->use_tx_msgqs = MSM_MSGQ_ENABLED;
 	}
 
