@@ -1235,8 +1235,7 @@ int sps_bam_pipe_set_params(struct sps_bam *dev, u32 pipe_index, u32 options)
 							GFP_KERNEL);
 			}
 			if (pipe->sys.desc_cache == NULL) {
-				SPS_ERR(dev,
-					"sps:No memory for pipe%d of BAM %pa\n",
+				SPS_ERR("sps:No memory for pipe%d of BAM %pa\n",
 						pipe_index, BAM_ID(dev));
 				return -ENOMEM;
 			}
@@ -1245,23 +1244,14 @@ int sps_bam_pipe_set_params(struct sps_bam *dev, u32 pipe_index, u32 options)
 				vmalloc(pipe->desc_size + size);
 
 			if (pipe->sys.desc_cache == NULL) {
-				SPS_ERR(dev,
-					"sps:No memory for pipe %d of BAM %pa\n",
-					pipe_index, BAM_ID(dev));
+				SPS_ERR("sps:No memory for pipe%d of BAM %pa\n",
+						pipe_index, BAM_ID(dev));
 				return -ENOMEM;
 			}
 
 			memset(pipe->sys.desc_cache, 0, pipe->desc_size + size);
 		}
 
-		if (pipe->sys.desc_cache == NULL) {
-			/*** MUST BE LAST POINT OF FAILURE (see below) *****/
-			SPS_ERR(dev,
-				"sps:Desc cache error: BAM %pa pipe %d: %d\n",
-				BAM_ID(dev), pipe_index,
-				pipe->desc_size + size);
-			return SPS_ERROR;
-		}
 		pipe->sys.user_ptrs = (void **)(pipe->sys.desc_cache +
 						 pipe->desc_size);
 		pipe->sys.cache_offset = pipe->sys.acked_offset;

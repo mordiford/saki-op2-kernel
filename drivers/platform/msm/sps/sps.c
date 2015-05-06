@@ -2246,6 +2246,8 @@ int sps_deregister_bam_device(unsigned long dev_handle)
 	struct sps_bam *bam;
 	int n;
 
+	SPS_DBG2("sps:%s.", __func__);
+
 	if (dev_handle == 0) {
 		SPS_ERR(sps, "sps:%s:device handle should not be 0.\n",
 				__func__);
@@ -2261,6 +2263,12 @@ int sps_deregister_bam_device(unsigned long dev_handle)
 
 	SPS_DBG3(sps, "sps:%s: SPS deregister BAM: phys %pa.",
 		__func__, &bam->props.phys_addr);
+
+	if (bam->props.options & SPS_BAM_HOLD_MEM) {
+		for (n = 0; n < BAM_MAX_PIPES; n++)
+			if (bam->desc_cache_pointers[n] != NULL)
+				kfree(bam->desc_cache_pointers[n]);
+	}
 
 	if (bam->props.options & SPS_BAM_HOLD_MEM) {
 		for (n = 0; n < BAM_MAX_PIPES; n++)
