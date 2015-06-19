@@ -1695,6 +1695,7 @@ int rcu_needs_cpu(int cpu, unsigned long *dj)
  */
 static void rcu_prepare_for_idle(int cpu)
 {
+	bool needwake;
 	struct rcu_data *rdp;
 	struct rcu_dynticks *rdtp = &per_cpu(rcu_dynticks, cpu);
 	struct rcu_node *rnp;
@@ -1740,8 +1741,10 @@ static void rcu_prepare_for_idle(int cpu)
 			continue;
 		rnp = rdp->mynode;
 		raw_spin_lock(&rnp->lock); /* irqs already disabled. */
-		rcu_accelerate_cbs(rsp, rnp, rdp);
+		needwake = rcu_accelerate_cbs(rsp, rnp, rdp);
 		raw_spin_unlock(&rnp->lock); /* irqs remain disabled. */
+		if (needwake)
+			rcu_gp_kthread_wake(rsp);
 	}
 }
 
