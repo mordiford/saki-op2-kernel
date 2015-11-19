@@ -265,12 +265,10 @@ int mdss_mdp_overlay_req_check(struct msm_fb_data_type *mfd,
 	    req->src_rect.w < min_src_size || req->src_rect.h < min_src_size ||
 	    CHECK_BOUNDS(req->src_rect.x, req->src_rect.w, req->src.width) ||
 	    CHECK_BOUNDS(req->src_rect.y, req->src_rect.h, req->src.height)) {
-#if 0
 		pr_err("invalid source image img wh=%dx%d rect=%d,%d,%d,%d\n",
 		       req->src.width, req->src.height,
 		       req->src_rect.x, req->src_rect.y,
 		       req->src_rect.w, req->src_rect.h);
-#endif
 		return -EOVERFLOW;
 	}
 
@@ -2628,22 +2626,14 @@ int mdss_mdp_overlay_vsync_ctrl(struct msm_fb_data_type *mfd, int en)
 
 	if (!ctl)
 		return -ENODEV;
-
-	mutex_lock(&mdp5_data->ov_lock);
-	if (!ctl->ops.add_vsync_handler || !ctl->ops.remove_vsync_handler) {
-		rc = -EOPNOTSUPP;
-		pr_err_once("fb%d vsync handlers are not registered\n",
-			mfd->index);
-		goto end;
-	}
-
+	if (!ctl->ops.add_vsync_handler || !ctl->ops.remove_vsync_handler)
+		return -EOPNOTSUPP;
 	if (!ctl->panel_data->panel_info.cont_splash_enabled
 		&& (!mdss_mdp_ctl_is_power_on(ctl) ||
 		mdss_panel_is_power_on_ulp(ctl->power_state))) {
-		pr_debug("fb%d vsync pending first update en=%d, ctl power state:%d\n",
-				mfd->index, en, ctl->power_state);
-		rc = -EPERM;
-		goto end;
+		pr_debug("fb%d vsync pending first update en=%d\n",
+				mfd->index, en);
+		return -EPERM;
 	}
 
 	pr_debug("fb%d vsync en=%d\n", mfd->index, en);
@@ -2657,8 +2647,6 @@ int mdss_mdp_overlay_vsync_ctrl(struct msm_fb_data_type *mfd, int en)
 	mdss_mdp_clk_ctrl(MDP_BLOCK_POWER_OFF);
 	mutex_unlock(&mdp5_data->ov_lock);
 
-end:
-	mutex_unlock(&mdp5_data->ov_lock);
 	return rc;
 }
 
@@ -4732,16 +4720,6 @@ static int mdss_mdp_overlay_off(struct msm_fb_data_type *mfd)
 		msleep(vsync_time);
 
 		__vsync_retire_signal(mfd, mdp5_data->retire_cnt);
-
-		/*
-		 * the retire work can still schedule after above retire_signal
-		 * api call. Flush workqueue guarantees that current caller
-		 * context is blocked till retire_work finishes. Any work
-		 * schedule after flush call should not cause any issue because
-		 * retire_signal api checks for retire_cnt with sync_mutex lock.
-		 */
-
-		flush_work(&mdp5_data->retire_work);
 	}
 
 ctl_stop:
