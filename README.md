@@ -44,6 +44,7 @@
 
 ### Others
 
+- **Merge `linux-3.10.94`**
 - *Fast Charge (up to 2000mAh!)*
 - *Include Kernel-Adiutor Mod*
 
