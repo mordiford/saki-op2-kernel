@@ -45,6 +45,7 @@
 ### Others
 
 - **Merge `linux-3.10.94`**
+- **Merge tag `LA.BF64.1.2.2-06440-8x94.0` from CAF**
 - *Fast Charge (up to 2000mAh!)*
 - *Include Kernel-Adiutor Mod*
 
