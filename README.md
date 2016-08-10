@@ -11,7 +11,7 @@
 
 > **bold**: added by me, *italic*: added by benschhold
 
-### CPU Governor
+### CPU Governors
 
 - **alucard**
 - *barry_allen*
@@ -33,6 +33,12 @@
 - userspace
 - *zzmoove*
 
+### Hotplugs
+
+- **alucard_hotplug**
+- intelliplug
+- *thunderplug*
+
 ### Optimizations
 
 - *-Ofast*
@@ -47,7 +53,6 @@
 - **Merge `linux-3.10.94`**
 - **Merge tag `LA.BF64.1.2.2-06440-8x94.0` from CAF**
 - *Fast Charge (up to 2000mAh!)*
-- *Include Kernel-Adiutor Mod*
 
 ## Thanks
 
