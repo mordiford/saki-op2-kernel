@@ -1,5 +1,12 @@
 # saki-op2-kernel
 
+![](https://img.shields.io/badge/oneplus-msm8994-ff69b4.svg?style=flat-square)
+![](https://img.shields.io/badge/arch-arm64-blue.svg?style=flat-square) 
+![](https://img.shields.io/badge/linux-3.10.94-lightgray.svg?style=flat-square)
+![](https://img.shields.io/badge/UBERTC-4.9--kernel-brightgreen.svg?style=flat-square)
+![](https://img.shields.io/badge/fastcharge-2000mAh-orange.svg?style=flat-square)
+
+
 > *Beyond the sky, into the firmament.*
 
 ![icon](icon.png)
@@ -67,7 +74,8 @@
 
 ### lindwurm
 
-- https://maud.io
-- https://twitter.com/lindwurm
-- https://github.com/lindwurm
-- http://forum.xda-developers.com/member.php?u=6024671
+- web: [maud.io](https://maud.io)
+- twitter: [@lindwurm](https://twitter.com/lindwurm)
+- github: [@lindwurm](https://github.com/lindwurm)
+    - org for android: [@mordiford](https://github.com/mordiford)
+- xda: [@1indwurm](http://forum.xda-developers.com/member.php?u=6024671)
