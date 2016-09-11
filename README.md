@@ -2,7 +2,7 @@
 
 ![](https://img.shields.io/badge/oneplus-msm8994-ff69b4.svg?style=flat-square)
 ![](https://img.shields.io/badge/arch-arm64-blue.svg?style=flat-square) 
-![](https://img.shields.io/badge/linux-3.10.94-lightgray.svg?style=flat-square)
+![](https://img.shields.io/badge/linux-3.10.103-lightgray.svg?style=flat-square)
 ![](https://img.shields.io/badge/UBERTC-4.9--kernel-brightgreen.svg?style=flat-square)
 ![](https://img.shields.io/badge/fastcharge-2000mAh-orange.svg?style=flat-square)
 
@@ -57,7 +57,7 @@
 
 ### Others
 
-- **Merge `linux-3.10.94`**
+- **Merge `linux-3.10.103`**
 - **Merge tag `LA.BF64.1.2.2-06440-8x94.0` from CAF**
 - *Fast Charge (up to 2000mAh!)*
 
@@ -69,6 +69,7 @@
 - https://github.com/benschhold
 - https://github.com/Alucard24
 - https://github.com/AndroPlus-org
+- https://github.com/BobZmotion
 
 ## Author
 
