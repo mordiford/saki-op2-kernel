@@ -40,7 +40,6 @@ void dbs_check_cpu(struct dbs_data *dbs_data, int cpu)
 	unsigned int max_load = 0;
 	unsigned int ignore_nice;
 	unsigned int j;
-	struct cpufreq_govinfo govinfo;
 
 	if (dbs_data->cdata->governor == GOV_ONDEMAND)
 		ignore_nice = od_tuners->ignore_nice_load;
@@ -100,19 +99,6 @@ void dbs_check_cpu(struct dbs_data *dbs_data, int cpu)
 			continue;
 
 		load = 100 * (wall_time - idle_time) / wall_time;
-
-		/*
-		 * Send govinfo notification.
-		 * Govinfo notification could potentially wake up another thread
-		 * managed by its clients. Thread wakeups might trigger a load
-		 * change callback that executes this function again. Therefore
-		 * no spinlock could be held when sending the notification.
-		 */
-		govinfo.cpu = j;
-		govinfo.load = load;
-		govinfo.sampling_rate_us = sampling_rate;
-		atomic_notifier_call_chain(&cpufreq_govinfo_notifier_list,
-						   CPUFREQ_LOAD_CHANGE, &govinfo);
 
 		if (load > max_load)
 			max_load = load;
